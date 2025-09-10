@@ -1,35 +1,40 @@
 import mysql.connector
 
 def stream_users_in_batches(batch_size):
-    """Generator that fetches rows in batches from the user_data table."""
+    """
+    Generator that fetches rows in batches from the user_data table.
+    """
     connection = mysql.connector.connect(
         host="localhost",
-        user="root",       # update with your MySQL username
-        password="password", # update with your MySQL password
+        user="root",         # <-- update if different
+        password="password", # <-- update if different
         database="ALX_prodev"
     )
     cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM user_data;")
 
+    offset = 0
     while True:
-        batch = cursor.fetchmany(batch_size)
-        if not batch:
+        cursor.execute("SELECT * FROM user_data LIMIT %s OFFSET %s;", (batch_size, offset))
+        rows = cursor.fetchall()
+        if not rows:
             break
-        yield batch
+        yield rows   # ✅ yield instead of return
+        offset += batch_size
 
     cursor.close()
     connection.close()
 
 
 def batch_processing(batch_size):
-    """Processes each batch to filter users over the age of 25."""
-    for batch in stream_users_in_batches(batch_size):   # loop 1
-        filtered = [user for user in batch if user["age"] > 25]  # loop 2 (list comprehension counts as a loop)
-        yield filtered
+    """
+    Processes batches and yields users over the age of 25.
+    """
+    for batch in stream_users_in_batches(batch_size):  # loop 1
+        filtered = [user for user in batch if user["age"] > 25]  # loop 2 (list comp)
+        if filtered:
+            yield filtered   # ✅ yield, not return
 
 
-# Example usage
 if __name__ == "__main__":
-    for batch in batch_processing(3):   # loop 3
-        print("Processed batch:", batch)
-
+    for processed_batch in batch_processing(3):  # loop 3
+        print("Filtered batch:", processed_batch)
