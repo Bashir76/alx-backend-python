@@ -1,32 +1,26 @@
 import asyncio
 import aiosqlite
 
-DB_NAME = "users.db"
-
-# 🔹 Async function to fetch all users
-async def asyncfetchusers():
-    async with aiosqlite.connect(DB_NAME) as db:
+# asynchronous function to fetch all users
+async def async_fetch_users():
+    async with aiosqlite.connect("users.db") as db:
         async with db.execute("SELECT * FROM users") as cursor:
-            results = await cursor.fetchall()
-            print("All Users:", results)
-            return results
+            return await cursor.fetchall()
 
-# 🔹 Async function to fetch users older than 40
-async def asyncfetcholder_users():
-    async with aiosqlite.connect(DB_NAME) as db:
+# asynchronous function to fetch users older than 40
+async def async_fetch_older_users():
+    async with aiosqlite.connect("users.db") as db:
         async with db.execute("SELECT * FROM users WHERE age > 40") as cursor:
-            results = await cursor.fetchall()
-            print("Users older than 40:", results)
-            return results
+            return await cursor.fetchall()
 
-# 🔹 Run both queries concurrently
+# run both queries concurrently
 async def fetch_concurrently():
     results = await asyncio.gather(
-        asyncfetchusers(),
-        asyncfetcholder_users()
+        async_fetch_users(),
+        async_fetch_older_users()
     )
-    return results
+    print("All Users:", results[0])
+    print("Users older than 40:", results[1])
 
-# ✅ Run the event loop
 if __name__ == "__main__":
     asyncio.run(fetch_concurrently())
