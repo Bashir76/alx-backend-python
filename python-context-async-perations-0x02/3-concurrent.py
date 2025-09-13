@@ -1,26 +1,32 @@
-import sqlite3
+import asyncio
+import aiosqlite
 
-class ExecuteQuery:
-    def __init__(self, query, params=(), db_name="users.db"):
-        self.db_name = db_name
-        self.query = query
-        self.params = params
-        self.conn = None
-        self.cursor = None
+DB_NAME = "users.db"
 
-    def __enter__(self):
-        self.conn = sqlite3.connect(self.db_name)
-        self.cursor = self.conn.cursor()
-        self.cursor.execute(self.query, self.params)
-        return self.cursor.fetchall()
+# 🔹 Async function to fetch all users
+async def asyncfetchusers():
+    async with aiosqlite.connect(DB_NAME) as db:
+        async with db.execute("SELECT * FROM users") as cursor:
+            results = await cursor.fetchall()
+            print("All Users:", results)
+            return results
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.conn:
-            self.conn.close()
+# 🔹 Async function to fetch users older than 40
+async def asyncfetcholder_users():
+    async with aiosqlite.connect(DB_NAME) as db:
+        async with db.execute("SELECT * FROM users WHERE age > 40") as cursor:
+            results = await cursor.fetchall()
+            print("Users older than 40:", results)
+            return results
 
+# 🔹 Run both queries concurrently
+async def fetch_concurrently():
+    results = await asyncio.gather(
+        asyncfetchusers(),
+        asyncfetcholder_users()
+    )
+    return results
 
-# ✅ Usage
+# ✅ Run the event loop
 if __name__ == "__main__":
-    with ExecuteQuery("SELECT * FROM users WHERE age > ?", (25,)) as results:
-        print("Users older than 25:", results)
-
+    asyncio.run(fetch_concurrently())
