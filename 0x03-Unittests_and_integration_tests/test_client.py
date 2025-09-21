@@ -70,7 +70,8 @@ class TestGithubOrgClient(unittest.TestCase):
         "expected_repos": expected_repos,
         "apache2_repos": apache2_repos,
     }
-    for org_payload, repos_payload, expected_repos, apache2_repos in TEST_PAYLOAD
+    for org_payload, repos_payload,
+    expected_repos, apache2_repos in TEST_PAYLOAD
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration tests for GithubOrgClient using fixtures."""
