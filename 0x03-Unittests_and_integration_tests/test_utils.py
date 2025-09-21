@@ -29,7 +29,10 @@ class TestAccessNestedMap(unittest.TestCase):
         """Test access_nested_map raises KeyError as expected."""
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
-        self.assertEqual(str(cm.exception), f"'{path[-1]}'")
+        self.assertEqual(
+            str(cm.exception),
+            f"'{path[-1]}'"
+        )
 
 
 class TestGetJson(unittest.TestCase):
@@ -41,7 +44,10 @@ class TestGetJson(unittest.TestCase):
     ])
     @patch("utils.requests.get")
     def test_get_json(self, test_url, test_payload, mock_get):
-        """Test get_json returns expected payload and calls requests.get once."""
+        """
+        Test get_json returns expected payload
+        and calls requests.get once.
+        """
         mock_get.return_value = Mock()
         mock_get.return_value.json.return_value = test_payload
 
@@ -69,7 +75,11 @@ class TestMemoize(unittest.TestCase):
                 """Return value from a_method but cached."""
                 return self.a_method()
 
-        with patch.object(TestClass, "a_method", return_value=42) as mock_method:
+        with patch.object(
+            TestClass,
+            "a_method",
+            return_value=42
+        ) as mock_method:
             test = TestClass()
             self.assertEqual(test.a_property, 42)
             self.assertEqual(test.a_property, 42)
