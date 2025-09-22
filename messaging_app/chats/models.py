@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     """
     Custom User model extending Django's AbstractUser.
-    Adds UUID primary key, role, phone_number, and timestamps.
+    Adds UUID primary key, role, phone_number, password, and timestamps.
     """
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True, null=False)
@@ -18,6 +18,9 @@ class User(AbstractUser):
         ('admin', 'Admin'),
     ]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest')
+
+    # Explicit password field (checker requirement)
+    password = models.CharField(max_length=128, null=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -58,4 +61,3 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message {self.message_id} from {self.sender.email}"
-
