@@ -1,35 +1,37 @@
 from rest_framework import permissions
-from .models import Conversation, Message
 
 class IsParticipantOfConversation(permissions.BasePermission):
     """
-    - Allow only authenticated users (global REST_FRAMEWORK default ensures this)
-    - Allow only participants of a conversation to view/send/update/delete messages or access that conversation.
+    Custom permission:
+    - Only authenticated users can access the API
+    - Only participants in a conversation can send, view, update, or delete messages
     """
 
-    def has_permission(self, request, view):
-        # Must be authenticated (global setting enforces this), keep explicit check
+    def has_object_permission(self, request, view, obj):
+        # Must be logged in
         if not request.user or not request.user.is_authenticated:
             return False
 
-        # For list/create views, allow -- object permissions will be enforced later.
-        # For creating a conversation, any authenticated user is allowed.
-        return True
+        # Check if the user is part of the conversation
+        participants = getattr(obj, "participants", None)
+        conversation = getattr(obj, "conversation", None)
 
-    def has_object_permission(self, request, view, obj):
-        """
-        obj may be a Conversation or Message instance.
-        - If Conversation: user must be in participants.
-        - If Message: user must be in message.conversation.participants.
-        """
-        user = request.user
+        if participants:
+            is_participant = request.user in participants.all()
+        elif conversation:
+            is_participant = request.user in conversation.participants.all()
+        else:
+            is_participant = False
 
-        if isinstance(obj, Conversation):
-            return obj.participants.filter(pk=user.pk).exists()
+        if not is_participant:
+            return False
 
-        if isinstance(obj, Message):
-            conv = obj.conversation
-            return conv.participants.filter(pk=user.pk).exists()
+        # Explicitly allow SAFE_METHODS
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
-        # default deny
+        # Explicitly check write methods: POST, PUT, PATCH, DELETE
+        if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
+            return True
+
         return False
