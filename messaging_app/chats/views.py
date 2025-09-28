@@ -24,11 +24,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filterset_class = MessageFilter
     pagination_class = MessagePagination
+
+    def get_queryset(self):
+        # ✅ Restrict messages to only conversations the user participates in
+        return Message.objects.filter(conversation__participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         conversation_id = request.data.get("conversation")
@@ -38,7 +41,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         if request.user not in conversation.participants.all():
             return Response(
                 {"detail": "You are not allowed to send messages in this conversation."},
-                status=status.HTTP_403_FORBIDDEN,  # ✅ Explicit forbidden
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         serializer = self.get_serializer(data=request.data)
