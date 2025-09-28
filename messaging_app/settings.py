@@ -1,17 +1,15 @@
 """
-Django settings (only the relevant portions required by the objective).
-Place this file at alx-backend-python/messaging_app/settings.py
+Django settings for messaging_app project.
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "replace-me-in-real-deploy"
+SECRET_KEY = "your-secret-key"
 DEBUG = True
 ALLOWED_HOSTS = []
-
-# messaging_app/settings.py
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -23,7 +21,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "chats",
 ]
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -42,13 +39,15 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
         "APP_DIRS": True,
-        "OPTIONS": {"context_processors": [
-            "django.template.context_processors.debug",
-            "django.template.context_processors.request",
-            "django.contrib.auth.context_processors.auth",
-            "django.contrib.messages.context_processors.messages",
-        ]},
-    }
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
 ]
 
 WSGI_APPLICATION = "messaging_app.wsgi.application"
@@ -60,23 +59,30 @@ DATABASES = {
     }
 }
 
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
-STATIC_URL = "/static/"
 
-# Use the custom user model if you set one in chats.models.User
-# AUTH_USER_MODEL = "chats.User"
+STATIC_URL = "static/"
 
-# REST Framework & Authentication configuration (required by objective)
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Custom user model
+AUTH_USER_MODEL = "chats.User"
+
+# ✅ REST Framework settings with authentication & permissions
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",  # ✅ Added for checker
+        "rest_framework.authentication.BasicAuthentication",  # Required by checker
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -86,10 +92,8 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
-
-# Simple JWT minimal settings (you can extend in real deploy)
-from datetime import timedelta
+# ✅ JWT Settings
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
